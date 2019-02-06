@@ -1,87 +1,148 @@
----
-title: Descending into the bottomhole. A Marching Algorithm for Vertical Lift Performance
-  in Petroleum Engineering
-output:
-  html_document: 
-    keep_md: yes
----
-
-
-
-
-
+Descending into the bottomhole. A Marching Algorithm for Vertical Lift
+Performance in Petroleum Engineering
+================
 
 # Introduction
-I have always been captivated by calculations performed at depth in wells. The numerous correlations and curves that were built in the golden years of production engineering are just fascinating. _Thank you Mr. Brown. Thank you Mr. Beggs._ From all the various algorithms, I particularly liked one calculating the pressure losses in the tubing as the hydrocarbon fluids ascend to the surface, also called tubing performance, or vertical lift performance (VLP). If you are a petroleum engineer who just started learning to code, there is no better exercise than calculating the pressure gradient at any depth point in the wellbore. It tests your petroleum engineering skills with fluid properties of oil, gas and water; correlations; multi-phase phenomena; pressure and temperature effects; heat transfer, etc. 
 
-Although, we will not be seeing all the calculations to perform a full VLP using Hagendorn-Brown, Fancher-Brown, Duns-Ros, or Beggs-Brill correlations, this article will place you in condition to understand the whole application when it is publicly released. I will be using R as it has demonstrated a solid and reliable platform for developing rapid applications not only for statistics and data science, but also in engineering and science in general.
+I have always been captivated by calculations performed at depth in
+wells. The numerous correlations and curves that were built in the
+golden years of production engineering are just fascinating. *Thank you
+Mr. Brown. Thank you Mr. Beggs.* From all the various algorithms, I
+particularly liked one calculating the pressure losses in the tubing as
+the hydrocarbon fluids ascend to the surface, also called tubing
+performance, or vertical lift performance (VLP). If you are a petroleum
+engineer who just started learning to code, there is no better exercise
+than calculating the pressure gradient at any depth point in the
+wellbore. It tests your petroleum engineering skills with fluid
+properties of oil, gas and water; correlations; multi-phase phenomena;
+pressure and temperature effects; heat transfer, etc.
 
+Although, we will not be seeing all the calculations to perform a full
+VLP using Hagendorn-Brown, Fancher-Brown, Duns-Ros, or Beggs-Brill
+correlations, this article will place you in condition to understand the
+whole application when it is publicly released. I will be using R as it
+has demonstrated a solid and reliable platform for developing rapid
+applications not only for statistics and data science, but also in
+engineering and science in general.
 
 # Motivation
-For those colleagues that are looking to implement an engineering library to solve some problems arising during daily operations there is no better tool than a scripting language, be that [R](https://www.r-project.org/about.html), or [Python](https://www.python.org/). There has not been a better time to switch from Excel and VBA to do quick coding than today with all the tools provided by the __data science revolution__. Besides revision control of your work with Git, ease of sharing within your organization, building rapid prototypes, you are also following one of the key premises of data science. Actually, what adds the word __science__ to *data science*: __reproducibility__.
+
+For those colleagues that are looking to implement an engineering
+library to solve some problems arising during daily operations there is
+no better tool than a scripting language, be that
+[R](https://www.r-project.org/about.html), or
+[Python](https://www.python.org/). There has not been a better time to
+switch from Excel and VBA to do quick coding than today with all the
+tools provided by the **data science revolution**. Besides revision
+control of your work with Git, ease of sharing within your organization,
+building rapid prototypes, you are also following one of the key
+premises of data science. Actually, what adds the word **science** to
+*data science*: **reproducibility**.
 
 The code I am publishing here serves three purposes:
 
-* Familiarize the petroleum engineer with a fundamental algorithm for downhole calculations
-* Learn the basics of scripting with R: vectors, lists, dataframes, loops and decision logic. And plotting with one of the best tools in data visualization: `ggplot2`.
-* Show the basic structure of more complex iterating algorithms for calculating conditions at any depth point in the well.
-
+  - Familiarize the petroleum engineer with a fundamental algorithm for
+    downhole calculations
+  - Learn the basics of scripting with R: vectors, lists, dataframes,
+    loops and decision logic. And plotting with one of the best tools in
+    data visualization: `ggplot2`.
+  - Show the basic structure of more complex iterating algorithms for
+    calculating conditions at any depth point in the well.
 
 # Computation Workflow
+
 This is a description of what the code will be doing.
 
-1. Read the well input data
-1. Set the number of tubing segments
-1. Calculate length of tubing segments
-1. Set the starting calculation increment for the gradient
-1. Set an starting value for the inlet and outlet pressures
-1. Iterate through the number of tubing segments
-    1. Calculate a depth point
-    1. Calculate the outlet pressure at current depth
-    1. Iterate until absolute error is within the defined tolerance
-        1. Calculate the average pressure
-        1. Calculate the fluid properties at P, T
-        1. Calculate the pressure gradient 
-        1. Calculate a new outlet pressure
-        1. Compare the absolute error vs the tolerance for the pressure
-        1. If not converging, set inlet pressure to outlet pressure; 
-        repeat from step `6c`
-        1. Store calculations at depth
-    1. If more tubing segment repeat from step `6`
-1. Make data table
+1.  Read the well input data
+2.  Set the number of tubing segments
+3.  Calculate length of tubing segments
+4.  Set the starting calculation increment for the gradient
+5.  Set an starting value for the inlet and outlet pressures
+6.  Iterate through the number of tubing segments
+    1.  Calculate a depth point
+    2.  Calculate the outlet pressure at current depth
+    3.  Iterate until absolute error is within the defined tolerance
+        1.  Calculate the average pressure
+        2.  Calculate the fluid properties at P, T
+        3.  Calculate the pressure gradient
+        4.  Calculate a new outlet pressure
+        5.  Compare the absolute error vs the tolerance for the pressure
+        6.  If not converging, set inlet pressure to outlet pressure;
+            repeat from step `6c`
+        7.  Store calculations at depth
+    4.  If more tubing segment repeat from step `6`
+7.  Make data table
 
+<!-- end list -->
 
-* Calculating the length of the tubing segments involve dividing the well depth ($L$) by the number of depth points ($n$). In this example `n=30`.
+  - Calculating the length of the tubing segments involve dividing the
+    well depth (![L](https://latex.codecogs.com/png.latex?L "L")) by the
+    number of depth points (![n](https://latex.codecogs.com/png.latex?n
+    "n")). In this example `n=30`.
 
-$$dL = L / n$$
+  
+![dL = L /
+n](https://latex.codecogs.com/png.latex?dL%20%3D%20L%20%2F%20n
+"dL = L / n")  
 
-* For setting the starting calculation increment for the gradient we could assume 0.002 psi/ft:
+  - For setting the starting calculation increment for the gradient we
+    could assume 0.002 psi/ft:
 
-$$\frac{dP}{dz} = 0.002$$
+  
+![\\frac{dP}{dz}
+= 0.002](https://latex.codecogs.com/png.latex?%5Cfrac%7BdP%7D%7Bdz%7D%20%3D%200.002
+"\\frac{dP}{dz} = 0.002")  
 
+  - Calculating the average pressure requires averaging the inlet and
+    outlet pressure at the ends of the virtual pipe:
 
-* Calculating the average pressure requires averaging the inlet and outlet pressure at the ends of the virtual pipe:
+  
+![p\_{avg} = \\frac {(p\_{in} + p\_{out})}
+{2}](https://latex.codecogs.com/png.latex?p_%7Bavg%7D%20%3D%20%5Cfrac%20%7B%28p_%7Bin%7D%20%2B%20p_%7Bout%7D%29%7D%20%7B2%7D
+"p_{avg} = \\frac {(p_{in} + p_{out})} {2}")  
 
-$$p_{avg} = \frac {(p_{in} + p_{out})} {2}$$
+  - Calculating the pressure gradient `-dP/dz`:   
+    ![\\left ( \\frac {dp} {dL} \\right ) = f(P\_{avg})
+    ](https://latex.codecogs.com/png.latex?%5Cleft%20%28%20%5Cfrac%20%7Bdp%7D%20%7BdL%7D%20%5Cright%20%29%20%3D%20f%28P_%7Bavg%7D%29%20
+    "\\left ( \\frac {dp} {dL} \\right ) = f(P_{avg}) ")  
+  - Calculating a new pressure
 
-* Calculating the pressure gradient `-dP/dz`:
-$$\left ( \frac {dp} {dL} \right ) = f(P_{avg}) $$
-* Calculating a new pressure
+  
+![p\_{i+1} = p\_i - \\left ( -\\frac {dP}{dL} \\right )\_i dL\_i
+](https://latex.codecogs.com/png.latex?p_%7Bi%2B1%7D%20%3D%20p_i%20-%20%5Cleft%20%28%20-%5Cfrac%20%7BdP%7D%7BdL%7D%20%5Cright%20%29_i%20dL_i%20
+"p_{i+1} = p_i - \\left ( -\\frac {dP}{dL} \\right )_i dL_i ")  
 
-$$p_{i+1} = p_i - \left ( -\frac {dP}{dL} \right )_i dL_i $$
+  - Comparing the absolute error of the new pressure and the current
+    outlet pressure. It should be less than the tolerance, otherwise, we
+    proceed with a new iteration making ![p\_{in} =
+    p\_{out}](https://latex.codecogs.com/png.latex?p_%7Bin%7D%20%3D%20p_%7Bout%7D
+    "p_{in} = p_{out}").
 
-* Comparing the absolute error of the new pressure and the current outlet pressure. It should be less than the tolerance, otherwise, we proceed with a new iteration making $p_{in} = p_{out}$.
-
-$$\ | \frac { p_{out} - p_{i+1} } { p_{i+1}} | < \epsilon$$
+  
+![\\ | \\frac { p\_{out} - p\_{i+1} } { p\_{i+1}} | \<
+\\epsilon](https://latex.codecogs.com/png.latex?%5C%20%7C%20%5Cfrac%20%7B%20p_%7Bout%7D%20-%20p_%7Bi%2B1%7D%20%7D%20%7B%20p_%7Bi%2B1%7D%7D%20%7C%20%3C%20%5Cepsilon
+"\\ | \\frac { p_{out} - p_{i+1} } { p_{i+1}} | \< \\epsilon")  
 
 # Implementation of marching algorithm for well gradient
-For demo purposes, only using a dummy function, $fPa$ that will symbolize all the intricate calculations to find the fluid properties at the current pressure and temperature. The last thing to do is generating a dataframe with the calculated data. As a matter of fact, it could be two dataframes, one for the main results for each pipe segment; and the second dataframe -with more detail-, showing the iterations and absolute error.
+
+For demo purposes, only using a dummy function,
+![fPa](https://latex.codecogs.com/png.latex?fPa "fPa") that will
+symbolize all the intricate calculations to find the fluid properties at
+the current pressure and temperature. The last thing to do is generating
+a dataframe with the calculated data. As a matter of fact, it could be
+two dataframes, one for the main results for each pipe segment; and the
+second dataframe -with more detail-, showing the iterations and absolute
+error.
 
 ## Marching algorithm
-I have added comments to the code as much as possible to be able to understand what every line of code is doing. There is no better way of coding than commenting code. Not only for whoever takes over your project but also keep in mind that you are documenting for your future self.
 
+I have added comments to the code as much as possible to be able to
+understand what every line of code is doing. There is no better way of
+coding than commenting code. Not only for whoever takes over your
+project but also keep in mind that you are documenting for your future
+self.
 
-```r
+``` r
 # load libraries
 library(latex2exp)
 library(ggplot2)
@@ -285,10 +346,16 @@ out_df <- data.table::rbindlist(output)    # convert list to table
 ```
 
 ## Plots
-The plots have been created using `ggplot2`, a very flexible, customizable and powerful visualization platform. I have made use of couple of advanced characteristics of ggplot: reverse the __y-axis__, and annotate the plot with [Latex](https://www.latex-project.org/) with the package `latextoexp`. Also, I am changing the default number of ticks on the y-axis using `breaks`, as well as sequences to mark the location of the ticks.
 
+The plots have been created using `ggplot2`, a very flexible,
+customizable and powerful visualization platform. I have made use of
+couple of advanced characteristics of ggplot: reverse the **y-axis**,
+and annotate the plot with [Latex](https://www.latex-project.org/) with
+the package `latextoexp`. Also, I am changing the default number of
+ticks on the y-axis using `breaks`, as well as sequences to mark the
+location of the ticks.
 
-```r
+``` r
 # plot pressure vs gradient
 ggplot(out_df, aes(x=dp_dz, y=p_calc)) +
     scale_y_continuous(limits = c(0, max(out_df$p_calc)),
@@ -298,10 +365,9 @@ ggplot(out_df, aes(x=dp_dz, y=p_calc)) +
     labs(title = TeX("Pressure vs $\\frac{dp}{dz}$"))
 ```
 
-<img src="README_files/figure-html/pressure-vs-gradient-1.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-gfm/pressure-vs-gradient-1.png" style="display: block; margin: auto;" />
 
-
-```r
+``` r
 # reverse the y-axis
 ggplot(out_df, aes(x=dp_dz, y=depth)) +
     scale_y_reverse(limits = c(max(out_df$depth), 0), 
@@ -310,13 +376,16 @@ ggplot(out_df, aes(x=dp_dz, y=depth)) +
     geom_point() + labs(title = TeX("Depth vs $\\frac{dp}{dz}$"))
 ```
 
-<img src="README_files/figure-html/depth-vs-gradient-1.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-gfm/depth-vs-gradient-1.png" style="display: block; margin: auto;" />
 
 ## Results table
-There are 1001 ways of getting the same result in R. Here I am using one that is fast with help from the package `data.table`. It converts the vector-list `output` to a data table; pretty similar or equivalent to a dataframe.
 
+There are 1001 ways of getting the same result in R. Here I am using one
+that is fast with help from the package `data.table`. It converts the
+vector-list `output` to a data table; pretty similar or equivalent to a
+dataframe.
 
-```r
+``` r
 # dataframe from row-vector
 out_df
 #>         depth    p_calc     p_avg     dp_dz
@@ -354,18 +423,26 @@ out_df
 #>         depth    p_calc     p_avg     dp_dz
 ```
 
-There it is. An algorithm to iterate through the production tubing to calculate fluid conditions at different depth points.
+There it is. An algorithm to iterate through the production tubing to
+calculate fluid conditions at different depth points.
 
-# What's Next
-* Integrate this marching algorithm with real calculations of fluid properties at pressure and temperature at depth. Formation volume factors, viscosities, holdup, surface velocity, compressibility factor, etc. I will be using a package I wrote in R for the calculation of compressibility factor for gases, [zFactor](https://github.com/f0nzie/zFactor).
+# What’s Next
 
-* Add heat transfer effects to the fluid temperature as it moves up to the surface.
+  - Integrate this marching algorithm with real calculations of fluid
+    properties at pressure and temperature at depth. Formation volume
+    factors, viscosities, holdup, surface velocity, compressibility
+    factor, etc. I will be using a package I wrote in R for the
+    calculation of compressibility factor for gases,
+    [zFactor](https://github.com/f0nzie/zFactor).
 
-* Add calculations for inclined wells.
+  - Add heat transfer effects to the fluid temperature as it moves up to
+    the surface.
 
+  - Add calculations for inclined wells.
 
 # References
-* 2006, Ovadia Shoham. Mechanistic Modeling of Gas Liquid Two-Phase flow in pipes.
-* 1977, Kermit E. Brown and H. Dale Beggs. The Technology of Artificial Lift Methods
 
-
+  - 2006, Ovadia Shoham. Mechanistic Modeling of Gas Liquid Two-Phase
+    flow in pipes.
+  - 1977, Kermit E. Brown and H. Dale Beggs. The Technology of
+    Artificial Lift Methods
