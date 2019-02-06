@@ -2,8 +2,8 @@
 title: Descending into the bottomhole. A Marching Algorithm for Vertical Lift Performance
   in Petroleum Engineering
 output:
-  html_document:
-    df_print: paged
+  html_document: 
+    keep_md: yes
 ---
 
 
