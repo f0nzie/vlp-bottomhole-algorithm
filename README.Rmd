@@ -84,7 +84,7 @@ $$p_{i+1} = p_i - \left ( -\frac {dP}{dL} \right )_i dL_i $$
 $$\ | \frac { p_{out} - p_{i+1} } { p_{i+1}} | < \epsilon$$
 
 # Implementation of marching algorithm for well gradient
-For demo purposes, only using a dummy function, $fPa$ that will symbolize all the intricate calculations to find the fluid properties at the current pressure and temperature. The last thing to do is generating a dataframe with the calculated data. As a matter of fact, it could be two dataframes, one for the main results for each pipe segment; and the second dataframe -with more detail-, showing the iterations and absolute error.
+For demo purposes, only using a dummy function,  that will symbolize all the intricate calculations to find the fluid properties at the current pressure and temperature. The last thing to do is generating a dataframe with the calculated data. As a matter of fact, it could be two dataframes, one for the main results for each pipe segment; and the second dataframe -with more detail-, showing the iterations and absolute error.
 
 ## Marching algorithm
 I have added comments to the code as much as possible to be able to understand what every line of code is doing. There is no better way of coding than commenting code. Not only for whoever takes over your project but also keep in mind that you are documenting for your future self.

@@ -125,12 +125,11 @@ n](https://latex.codecogs.com/png.latex?dL%20%3D%20L%20%2F%20n
 
 # Implementation of marching algorithm for well gradient
 
-For demo purposes, only using a dummy function,
-![fPa](https://latex.codecogs.com/png.latex?fPa "fPa") that will
-symbolize all the intricate calculations to find the fluid properties at
-the current pressure and temperature. The last thing to do is generating
-a dataframe with the calculated data. As a matter of fact, it could be
-two dataframes, one for the main results for each pipe segment; and the
+For demo purposes, only using a dummy function, that will symbolize all
+the intricate calculations to find the fluid properties at the current
+pressure and temperature. The last thing to do is generating a dataframe
+with the calculated data. As a matter of fact, it could be two
+dataframes, one for the main results for each pipe segment; and the
 second dataframe -with more detail-, showing the iterations and absolute
 error.
 
